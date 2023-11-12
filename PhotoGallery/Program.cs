@@ -10,7 +10,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-JWTConfiguration jwtConfiguration = builder.Configuration.GetSection("JWT").Get<JWTConfiguration>()
+JWTConfiguration jwtConfiguration = builder.Configuration.GetSection(PGConstants.JWT).Get<JWTConfiguration>()
     ?? throw new NullReferenceException($"{nameof(Program)}:{nameof(jwtConfiguration)}");
 string issuer = jwtConfiguration.Issuer
     ?? throw new NullReferenceException($"{nameof(Program)}:{nameof(issuer)}");
@@ -27,6 +27,9 @@ string projectId = firebaseConfiguration.ProjectId
     ?? throw new NullReferenceException($"{nameof(Program)}:{nameof(projectId)}");
 string bucketAddress = firebaseConfiguration.BucketAddress
     ?? throw new NullReferenceException($"{nameof(Program)}:{nameof(bucketAddress)}");
+
+string cors = builder.Configuration.GetSection(PGConstants.CORS).Get<string>()
+    ?? throw new NullReferenceException($"{nameof(Program)}:{nameof(cors)}");
 
 Environment.SetEnvironmentVariable(PGConstants.GoogleApplicationCredentialsEnvironementVariable, firebaseConfigPath);
 
@@ -88,6 +91,17 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins(cors)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 

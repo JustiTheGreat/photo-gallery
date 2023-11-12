@@ -5,6 +5,7 @@
         public static readonly string AuthorizationHeaderParsingErrorMessage = "Problem occured while parsing authorization header";
 
         public static readonly string JWT = "JWT";
+        public static readonly string CORS = "CORS";
         public static readonly string Firebase = "Firebase";
         public static readonly string UIdClaimName = "uid";
         public static readonly string GoogleApplicationCredentialsEnvironementVariable = "GOOGLE_APPLICATION_CREDENTIALS";
