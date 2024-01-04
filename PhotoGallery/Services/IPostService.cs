@@ -6,6 +6,6 @@ namespace PhotoGallery.Services
     {
         Task<PostResponseDTO> CreatePost(PostRequestDTO postDTO, string uid);
         Task<PostResponseDTO> GetPostById(string postId);
-        Task<List<PostResponseDTO>> GetAllPosts();
+        Task<List<PostResponseDTO>> GetAllPosts(string filter);
     }
 }

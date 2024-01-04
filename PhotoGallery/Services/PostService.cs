@@ -1,4 +1,5 @@
 ﻿using Google.Cloud.Firestore;
+using Microsoft.IdentityModel.Tokens;
 using PhotoGallery.Common;
 using PhotoGallery.DTOs;
 
@@ -50,12 +51,26 @@ namespace PhotoGallery.Services
                     );
         }
 
-        public async Task<List<PostResponseDTO>> GetAllPosts()
+        public async Task<List<PostResponseDTO>> GetAllPosts(string filter)
         {
             List<PostResponseDTO> postResponseDTOs = new();
             CollectionReference collection = _db.Collection(PGConstants.PostCollection);
             QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
-            foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+            List<DocumentSnapshot> filteredAndSortedPosts = querySnapshot.Documents.ToList();
+            if (!filter.IsNullOrEmpty())
+            {
+                filteredAndSortedPosts = filteredAndSortedPosts
+                    .Where(document => document.GetValue<string>("Description").Contains(filter))
+                    .Select(document => new
+                    {
+                        Document = document,
+                        Position = document.GetValue<string>("Description").IndexOf(filter)
+                    })
+                   .OrderBy(result => result.Position)
+                   .Select(result => result.Document)
+                   .ToList();
+            }
+            foreach (DocumentSnapshot documentSnapshot in filteredAndSortedPosts)
             {
                 string storagePath = documentSnapshot.GetValue<string>(PGConstants.PostCollectionStoragePathField);
                 postResponseDTOs.Add(new PostResponseDTO(

@@ -4,7 +4,6 @@ using PhotoGallery.Common;
 using PhotoGallery.DTOs;
 using PhotoGallery.Models;
 using PhotoGallery.Services;
-using System.Net;
 using System.Net.Http.Headers;
 
 namespace PhotoGallery.Controllers
@@ -104,17 +103,16 @@ namespace PhotoGallery.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet]
-        [Route("post")]
+        [Route("post/all/{filter}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<List<PostResponseDTO>> GetAllPosts()
+        public ActionResult<List<PostResponseDTO>> GetAllPosts([FromRoute] string filter)
         {
             try
             {
-                List<PostResponseDTO> postResponseDTO = _postService.GetAllPosts().Result;
+                List<PostResponseDTO> postResponseDTO = _postService.GetAllPosts(filter).Result;
                 return Ok(postResponseDTO);
             }
             catch (Exception ex)
