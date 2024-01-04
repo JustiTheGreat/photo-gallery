@@ -104,15 +104,33 @@ namespace PhotoGallery.Controllers
         }
 
         [HttpGet]
-        [Route("post/all/{filter}")]
+        [Route("post")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<List<PostResponseDTO>> GetAllPosts([FromRoute] string filter)
+        public ActionResult<List<PostResponseDTO>> GetAllPosts()
         {
             try
             {
-                List<PostResponseDTO> postResponseDTO = _postService.GetAllPosts(filter).Result;
+                List<PostResponseDTO> postResponseDTO = _postService.GetAllPosts().Result;
+                return Ok(postResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("post/filter/{filter}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<List<PostResponseDTO>> GetFilteredPosts([FromRoute] string filter)
+        {
+            try
+            {
+                List<PostResponseDTO> postResponseDTO = _postService.GetFilteredPosts(filter).Result;
                 return Ok(postResponseDTO);
             }
             catch (Exception ex)

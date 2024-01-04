@@ -51,25 +51,41 @@ namespace PhotoGallery.Services
                     );
         }
 
-        public async Task<List<PostResponseDTO>> GetAllPosts(string filter)
+        public async Task<List<PostResponseDTO>> GetAllPosts()
         {
             List<PostResponseDTO> postResponseDTOs = new();
             CollectionReference collection = _db.Collection(PGConstants.PostCollection);
             QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
-            List<DocumentSnapshot> filteredAndSortedPosts = querySnapshot.Documents.ToList();
-            if (!filter.IsNullOrEmpty())
+            List<DocumentSnapshot> posts = querySnapshot.Documents.ToList();
+            foreach (DocumentSnapshot documentSnapshot in posts)
             {
-                filteredAndSortedPosts = filteredAndSortedPosts
-                    .Where(document => document.GetValue<string>("Description").Contains(filter))
-                    .Select(document => new
-                    {
-                        Document = document,
-                        Position = document.GetValue<string>("Description").IndexOf(filter)
-                    })
-                   .OrderBy(result => result.Position)
-                   .Select(result => result.Document)
-                   .ToList();
+                string storagePath = documentSnapshot.GetValue<string>(PGConstants.PostCollectionStoragePathField);
+                postResponseDTOs.Add(new PostResponseDTO(
+                        documentSnapshot.Id,
+                        _imageService.GetImageString(storagePath).Result,
+                        documentSnapshot.GetValue<string>(PGConstants.PostCollectionDescriptionField),
+                        storagePath,
+                        documentSnapshot.GetValue<string>(PGConstants.PostCollectionUIdField)
+                        ));
             }
+            return postResponseDTOs;
+        }
+
+        public async Task<List<PostResponseDTO>> GetFilteredPosts(string filter)
+        {
+            List<PostResponseDTO> postResponseDTOs = new();
+            CollectionReference collection = _db.Collection(PGConstants.PostCollection);
+            QuerySnapshot querySnapshot = await collection.GetSnapshotAsync();
+            List<DocumentSnapshot> filteredAndSortedPosts = querySnapshot.Documents
+                .Where(document => document.GetValue<string>("Description").Contains(filter))
+                .Select(document => new
+                {
+                    Document = document,
+                    Position = document.GetValue<string>("Description").IndexOf(filter)
+                })
+                .OrderBy(result => result.Position)
+                .Select(result => result.Document)
+                .ToList();
             foreach (DocumentSnapshot documentSnapshot in filteredAndSortedPosts)
             {
                 string storagePath = documentSnapshot.GetValue<string>(PGConstants.PostCollectionStoragePathField);
